@@ -9,7 +9,7 @@ set -euxo pipefail
 # ComfyUI
 cd /home/runner
 git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules \
-    https://github.com/comfyanonymous/ComfyUI.git \
+    https://github.com/jwijaya83/ComfyUI.git \
     || (cd /home/runner/ComfyUI && git pull)
 
 # ComfyUI Manager
