@@ -2,7 +2,7 @@
 set -eu
 
 array=(
-https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/requirements.txt
+https://raw.githubusercontent.com/jwijaya83/ComfyUI/master/requirements.txt
 https://raw.githubusercontent.com/crystian/ComfyUI-Crystools/main/requirements.txt
 https://raw.githubusercontent.com/cubiq/ComfyUI_essentials/main/requirements.txt
 https://raw.githubusercontent.com/cubiq/ComfyUI_FaceAnalysis/main/requirements.txt

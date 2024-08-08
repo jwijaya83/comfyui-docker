@@ -60,7 +60,7 @@ sudo pip3.10 install --break-system-packages \
 ## 3. Install dependencies for ComfyUI
 ```sh
 sudo pip3.10 install --break-system-packages \
-    -r https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/requirements.txt \
+    -r https://raw.githubusercontent.com/jwijaya83/ComfyUI/master/requirements.txt \
     -r https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/requirements.txt
 ```
 
@@ -80,7 +80,7 @@ sudo pip3.10 install --break-system-packages \
 ## 4. Download ComfyUI
 ```sh
 git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules \
-    https://github.com/comfyanonymous/ComfyUI.git
+    https://github.com/jwijaya83/ComfyUI.git
 cd ComfyUI
 ```
 
@@ -106,4 +106,4 @@ python3.10 main.py --listen --port 8188 --directml
 
 TIP: For <4G VRAM, add arg: --lowvram
 
-NOTE: More CLI args: https://github.com/comfyanonymous/ComfyUI/blob/master/comfy/cli_args.py
+NOTE: More CLI args: https://github.com/jwijaya83/ComfyUI/blob/master/comfy/cli_args.py

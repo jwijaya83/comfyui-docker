@@ -143,7 +143,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         --index-url https://download.pytorch.org/whl/cu121 \
         --extra-index-url https://pypi.org/simple \
     && pip install \
-        -r https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/requirements.txt \
+        -r https://raw.githubusercontent.com/jwijaya83/ComfyUI/master/requirements.txt \
         -r https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/requirements.txt \
         -r https://raw.githubusercontent.com/MrForExample/ComfyUI-3D-Pack/8c4d127528a9215d23262df722facf519ed80f56/requirements.txt \
     && pip install \

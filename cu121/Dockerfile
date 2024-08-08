@@ -44,7 +44,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # (Do this firstly so PIP won't be solving too many deps at one time)
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --break-system-packages \
-        -r https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/requirements.txt \
+        -r https://raw.githubusercontent.com/jwijaya83/ComfyUI/master/requirements.txt \
         -r https://raw.githubusercontent.com/crystian/ComfyUI-Crystools/main/requirements.txt \
         -r https://raw.githubusercontent.com/cubiq/ComfyUI_essentials/main/requirements.txt \
         -r https://raw.githubusercontent.com/Fannovel16/comfyui_controlnet_aux/main/requirements.txt \
