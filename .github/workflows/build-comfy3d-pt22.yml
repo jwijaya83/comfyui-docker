@@ -1,21 +1,19 @@
-name: Publish 'rocm' to Docker Hub
+name: Publish 'comfy3d-pt22' to Docker Hub
 
 on: 
   workflow_dispatch: # Can be manually triggered
-  schedule: # Runs on every Monday, 07:00 UTC
-    - cron: '0 7 * * 1'
   push: 
     branches: [ main ]
     paths-ignore:
       - '**'
-      - '!rocm/Dockerfile'
-      - '!rocm/runner-scripts/**'
-      - '!.github/workflows/build-rocm.yml'
+      - '!comfy3d-pt22/Dockerfile'
+      - '!comfy3d-pt22/runner-scripts/**'
+      - '!.github/workflows/build-comfy3d-pt22.yml'
 
 
 jobs:
 
-  build-publish-rocm:
+  build-publish-comfy3d-pt22:
     environment: Publish to Docker Hub
     runs-on: ubuntu-latest
     steps:
@@ -29,9 +27,6 @@ jobs:
         with:
           overprovision-lvm: 'true'
           remove-android: 'true'
-          remove-dotnet: 'true'
-          remove-docker-images: 'true'
-          swap-size-mb: 512
       -
         name: Git checkout
         uses: actions/checkout@v4
@@ -48,12 +43,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESSTOKEN }}
       -
-        name: Build and push 'rocm'
+        name: Build and push 'comfy3d-pt22'
         uses: docker/build-push-action@v6
         with:
-          context: ./rocm
-          file: ./rocm/Dockerfile
-          tags: |
-            yanwk/comfyui-boot:rocm
-            yanwk/comfyui-boot:rocm-${{ steps.date.outputs.date }}
+          context: ./comfy3d-pt22
+          file: ./comfy3d-pt22/Dockerfile
+          tags:  |
+            yanwk/comfyui-boot:comfy3d-pt22
+            yanwk/comfyui-boot:comfy3d-pt22-${{ steps.date.outputs.date }}
           push: true

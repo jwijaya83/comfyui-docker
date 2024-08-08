@@ -1,7 +1,7 @@
 ################################################################################
-# Dockerfile that builds 'yanwk/comfyui-boot:rocm'
+# Dockerfile that builds 'yanwk/comfyui-boot:cu121'
 # A runtime environment for https://github.com/comfyanonymous/ComfyUI
-# With ROCm for AMD GPU.
+# Using CUDA 12.1& Python 3.11
 ################################################################################
 
 FROM opensuse/tumbleweed:latest
@@ -9,8 +9,7 @@ FROM opensuse/tumbleweed:latest
 LABEL maintainer="code@yanwk.fun"
 
 # Note: GCC for InsightFace;
-#       FFmpeg for video (pip[imageio-ffmpeg] will use system FFmpeg instead of bundled);
-#       'half' for ORT on ROCm.
+#       FFmpeg for video (pip[imageio-ffmpeg] will use system FFmpeg instead of bundled).
 # Note: CMake may use different version of Python. Using 'update-alternatives' to ensure default version.
 RUN --mount=type=cache,target=/var/cache/zypp \
     set -eu \
@@ -18,34 +17,28 @@ RUN --mount=type=cache,target=/var/cache/zypp \
         'https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Tumbleweed/Essentials/' packman-essentials \
     && zypper --gpg-auto-import-keys \
             install --no-confirm \
-        python310 python310-pip python310-wheel python310-setuptools \
-        python310-devel python310-Cython gcc-c++ python310-py-build-cmake \
-        python310-numpy python310-opencv \
-        python310-ffmpeg-python ffmpeg x264 x265 \
-        python310-dbm \
-        ghc-half \
+        python311 python311-pip python311-wheel python311-setuptools \
+        python311-devel python311-Cython gcc-c++ python311-py-build-cmake \
+        python311-numpy python311-opencv \
+        python311-ffmpeg-python ffmpeg x264 x265 \
+        python311-dbm \
         google-noto-sans-fonts google-noto-sans-cjk-fonts google-noto-coloremoji-fonts \
         shadow git aria2 \
         Mesa-libGL1 libgthread-2_0-0 \
-    && rm -f /usr/lib64/python3.10/EXTERNALLY-MANAGED \
-    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 10
+    && rm /usr/lib64/python3.11/EXTERNALLY-MANAGED \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 100
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --break-system-packages \
         --upgrade pip wheel setuptools
 
-# Install PyTorch && ONNX from AMD repo
-# https://rocm.docs.amd.com/projects/radeon/en/latest/docs/install/native_linux/install-pytorch.html
-# https://rocm.docs.amd.com/projects/radeon/en/latest/docs/install/native_linux/install-onnx.html
-# Using torchaudio CPU for compatibility
+# Install xFormers (stable version, will specify PyTorch version),
+# and Torchvision + Torchaudio (will downgrade to match xFormers' PyTorch version).
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --break-system-packages \
-        https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1.3/torch-2.1.2%2Brocm6.1.3-cp310-cp310-linux_x86_64.whl \
-        https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1.3/torchvision-0.16.1%2Brocm6.1.3-cp310-cp310-linux_x86_64.whl \
-        https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1.3/pytorch_triton_rocm-2.1.0%2Brocm6.1.3.4d510c3a44-cp310-cp310-linux_x86_64.whl \
-        https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1.3/onnxruntime_rocm-1.17.0-cp310-cp310-linux_x86_64.whl \
-        https://download.pytorch.org/whl/cpu/torchaudio-2.1.2%2Bcpu-cp310-cp310-linux_x86_64.whl \
-        --extra-index-url  https://download.pytorch.org/whl/rocm6.1
+        xformers torchvision torchaudio \
+        --index-url https://download.pytorch.org/whl/cu121 \
+        --extra-index-url https://pypi.org/simple
 
 # Dependencies for frequently-used
 # (Do this firstly so PIP won't be solving too many deps at one time)
@@ -59,10 +52,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         -r https://raw.githubusercontent.com/ltdrdata/ComfyUI-Impact-Pack/Main/requirements.txt \
         -r https://raw.githubusercontent.com/ltdrdata/ComfyUI-Impact-Subpack/main/requirements.txt \
         -r https://raw.githubusercontent.com/ltdrdata/ComfyUI-Inspire-Pack/main/requirements.txt \
-        -r https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/requirements.txt \
-        --extra-index-url https://download.pytorch.org/whl/rocm6.1
+        -r https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/requirements.txt
 
 # Dependencies for more, with few hand-pick:
+# 'cupy-cuda12x' for Frame Interpolation
 # 'compel lark' for smZNodes
 # 'torchdiffeq' for DepthFM
 # 'fairscale' for APISR
@@ -71,30 +64,60 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         -r https://raw.githubusercontent.com/cubiq/ComfyUI_FaceAnalysis/main/requirements.txt \
         -r https://raw.githubusercontent.com/cubiq/ComfyUI_InstantID/main/requirements.txt \
         -r https://raw.githubusercontent.com/Fannovel16/ComfyUI-Frame-Interpolation/main/requirements-no-cupy.txt \
+        cupy-cuda12x \
         -r https://raw.githubusercontent.com/FizzleDorf/ComfyUI_FizzNodes/main/requirements.txt \
         -r https://raw.githubusercontent.com/kijai/ComfyUI-KJNodes/main/requirements.txt \
         -r https://raw.githubusercontent.com/melMass/comfy_mtb/main/requirements.txt \
+        -r https://raw.githubusercontent.com/MrForExample/ComfyUI-3D-Pack/main/requirements.txt \
         -r https://raw.githubusercontent.com/storyicon/comfyui_segment_anything/main/requirements.txt \
         -r https://raw.githubusercontent.com/ZHO-ZHO-ZHO/ComfyUI-InstantID/main/requirements.txt \
         compel lark torchdiffeq fairscale \
-        python-ffmpeg \
-        --extra-index-url https://download.pytorch.org/whl/rocm6.1
+        python-ffmpeg
 
-# Fix MediaPipe's broken dep (protobuf<4).
+# 1. Fix ONNX Runtime "missing CUDA provider". Also add support for CUDA 12.1.
+#    Ref: https://onnxruntime.ai/docs/install/
+# 2. Fix MediaPipe's broken dep (protobuf<4).
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --break-system-packages \
-        mediapipe \
-    && pip list
+    pip uninstall --break-system-packages --yes \
+        onnxruntime-gpu \
+    && pip --no-cache-dir install --break-system-packages \
+        onnxruntime-gpu \
+        --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ \
+        --extra-index-url https://pypi.org/simple \
+    && pip install --break-system-packages \
+        mediapipe
 
-RUN df -h \
-    && du -ah /root \
-    && rm -rf /root/* /root/.*
+# Fix for libs (.so files)
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}\
+:/usr/local/lib64/python3.11/site-packages/torch/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/cuda_cupti/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/cuda_runtime/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/cudnn/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/cufft/lib"
 
-COPY runner-scripts/.  /runner-scripts/
+# More libs (not necessary, just in case)
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}\
+:/usr/local/lib/python3.11/site-packages/nvidia/cublas/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/cuda_nvrtc/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/curand/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/cusolver/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/cusparse/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/nccl/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/nvjitlink/lib\
+:/usr/local/lib/python3.11/site-packages/nvidia/nvtx/lib"
 
-USER root
-VOLUME /root
-WORKDIR /root
+# Create a low-privilege user
+RUN printf 'CREATE_MAIL_SPOOL=no' >> /etc/default/useradd \
+    && mkdir -p /home/runner /home/scripts \
+    && groupadd runner \
+    && useradd runner -g runner -d /home/runner \
+    && chown runner:runner /home/runner /home/scripts
+
+COPY --chown=runner:runner scripts/. /home/scripts/
+
+USER runner:runner
+VOLUME /home/runner
+WORKDIR /home/runner
 EXPOSE 8188
 ENV CLI_ARGS=""
-CMD ["bash","/runner-scripts/entrypoint.sh"]
+CMD ["bash","/home/scripts/entrypoint.sh"]
